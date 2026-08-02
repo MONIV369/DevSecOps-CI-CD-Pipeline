@@ -52,20 +52,22 @@ pipeline {
 
 
 
-//        stage('OWASP Dependency Check') {
-//
-//            steps {
-//
-//              sh '''
+        /*
+        stage('OWASP Dependency Check') {
 
-//                /opt/dependency-check/bin/dependency-check.sh \
-//                --scan . \
-//                --format HTML \
-//                --out dependency-check-report
+            steps {
 
-//                '''
+                sh '''
 
-//            }
+                /opt/dependency-check/bin/dependency-check.sh \
+                --scan . \
+                --format HTML \
+                --out dependency-check-report \
+                --data /opt/dependency-check/data
+
+                '''
+
+            }
 
 
             post {
@@ -88,6 +90,7 @@ pipeline {
             }
 
         }
+        */
 
 
 
@@ -180,3 +183,5 @@ pipeline {
 
 
     }
+
+}
