@@ -32,8 +32,6 @@ pipeline {
 
             steps {
 
-                withSonarQubeEnv('SonarQube') {
-
                     sh '''
 			sonar-scanner \
 			  -Dsonar.projectKey=linux-tweet-app \
@@ -42,7 +40,6 @@ pipeline {
 			  -Dsonar.login=sqp_a3f6d9c5a4f98b9f347556740ce2abe7b9687b6c                
 
 			'''
-		}
 
             }
 
