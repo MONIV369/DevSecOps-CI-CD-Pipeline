@@ -41,7 +41,7 @@ pipeline {
 			  -Dsonar.host.url=http://52.14.134.64:9000 \
 			  -Dsonar.login=sqp_a3f6d9c5a4f98b9f347556740ce2abe7b9687b6c                
 
-
+			'''
 		}
 
             }
