@@ -19,8 +19,8 @@ pipeline {
 
             steps {
 
-                git branch: 'master',
-                url: 'https://github.com/dockersamples/linux_tweet_app.git'
+                git branch: 'main',
+                url: 'https://github.com/MONIV369/DevSecOps-CI-CD-Pipeline.git'
 
             }
 
@@ -101,23 +101,24 @@ pipeline {
 
 
 
-        stage('Docker Push') {
+       stage('Docker Push') {
 
-            steps {
+ 	   steps {
+	
+        		withDockerRegistry(
+            		credentialsId: 'dockerhub-creds',
+            		url: 'https://index.docker.io/v1/'
+        		) {
 
-                withDockerRegistry(credentialsId: 'dockerhub-creds') {
+            		sh """
+            		docker push ${IMAGE_NAME}:${IMAGE_TAG}
+            		"""
 
-                    sh """
+        		}
 
-                    docker push ${IMAGE_NAME}:${IMAGE_TAG}
+    		}
 
-                    """
-
-                }
-
-            }
-
-        }
+	} 
 
 
     }
