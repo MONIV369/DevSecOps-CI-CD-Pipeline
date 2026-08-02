@@ -58,7 +58,7 @@ pipeline {
 
                 sh '''
 
-                dependency-check.sh \
+                /opt/dependency-check/bin/dependency-check.sh \
                 --scan . \
                 --format HTML \
                 --out dependency-check-report
