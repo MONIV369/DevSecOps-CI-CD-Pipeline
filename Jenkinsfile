@@ -3,18 +3,13 @@ pipeline {
     agent any
 
 
-    tools {
-
-        sonarRunner 'SonarScanner'
-
-    }
-
-
     environment {
 
         IMAGE_NAME = "moniv369/linux-tweet-app"
 
         IMAGE_TAG = "${BUILD_NUMBER}"
+
+        SONAR_SCANNER_HOME = tool 'SonarScanner'
 
     }
 
@@ -44,7 +39,7 @@ pipeline {
                 withSonarQubeEnv('SonarQube') {
 
                     sh '''
-                    sonar-scanner \
+                    ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
                     -Dsonar.projectKey=linux-tweet-app \
                     -Dsonar.sources=.
                     '''
@@ -72,6 +67,7 @@ pipeline {
 
             }
 
+
             post {
 
                 always {
@@ -95,7 +91,6 @@ pipeline {
 
 
 
-
         stage('Docker Build') {
 
             steps {
@@ -110,7 +105,6 @@ pipeline {
             }
 
         }
-
 
 
 
@@ -130,7 +124,6 @@ pipeline {
             }
 
         }
-
 
 
 
@@ -158,7 +151,6 @@ pipeline {
         }
 
 
-
     }
 
 
@@ -175,7 +167,7 @@ pipeline {
 
         failure {
 
-            echo "Pipeline failed. Check logs."
+            echo "Pipeline failed. Check console output"
 
         }
 
