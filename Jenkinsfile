@@ -3,6 +3,13 @@ pipeline {
     agent any
 
 
+    tools {
+
+        sonarQube 'SonarScanner'
+
+    }
+
+
     environment {
 
         IMAGE_NAME = "moniv369/linux-tweet-app"
@@ -19,8 +26,10 @@ pipeline {
 
             steps {
 
-                git branch: 'main',
-                url: 'https://github.com/MONIV369/DevSecOps-CI-CD-Pipeline.git'
+                git(
+                    branch: 'main',
+                    url: 'https://github.com/MONIV369/DevSecOps-CI-CD-Pipeline.git'
+                )
 
             }
 
@@ -32,14 +41,15 @@ pipeline {
 
             steps {
 
-                    sh '''
-			sonar-scanner \
-			  -Dsonar.projectKey=linux-tweet-app \
-			  -Dsonar.sources=. \
-			  -Dsonar.host.url=http://52.14.134.64:9000 \
-			  -Dsonar.login=sqp_a3f6d9c5a4f98b9f347556740ce2abe7b9687b6c                
+                withSonarQubeEnv('SonarQube') {
 
-			'''
+                    sh '''
+                    sonar-scanner \
+                    -Dsonar.projectKey=linux-tweet-app \
+                    -Dsonar.sources=.
+                    '''
+
+                }
 
             }
 
@@ -52,10 +62,49 @@ pipeline {
             steps {
 
                 sh '''
+
                 dependency-check.sh \
                 --scan . \
                 --format HTML \
                 --out dependency-check-report
+
+                '''
+
+            }
+
+            post {
+
+                always {
+
+                    publishHTML(
+                        target: [
+                            allowMissing: true,
+                            alwaysLinkToLastBuild: true,
+                            keepAll: true,
+                            reportDir: 'dependency-check-report',
+                            reportFiles: 'dependency-check-report.html',
+                            reportName: 'OWASP Dependency Check Report'
+                        ]
+                    )
+
+                }
+
+            }
+
+        }
+
+
+
+
+        stage('Docker Build') {
+
+            steps {
+
+                sh '''
+
+                docker build \
+                -t ${IMAGE_NAME}:${IMAGE_TAG} .
+
                 '''
 
             }
@@ -64,35 +113,19 @@ pipeline {
 
 
 
-        stage('Docker Build') {
-
-            steps {
-
-                sh """
-
-                docker build \
-                -t ${IMAGE_NAME}:${IMAGE_TAG} .
-
-                """
-
-            }
-
-        }
-
-
 
         stage('Trivy Image Scan') {
 
             steps {
 
-                sh """
+                sh '''
 
                 trivy image \
                 --severity HIGH,CRITICAL \
                 --exit-code 1 \
                 ${IMAGE_NAME}:${IMAGE_TAG}
 
-                """
+                '''
 
             }
 
@@ -100,35 +133,56 @@ pipeline {
 
 
 
-       stage('Docker Push') {
 
- 	   steps {
-	
-        		withDockerRegistry(
-            		credentialsId: 'dockerhub-creds',
-            		url: 'https://index.docker.io/v1/'
-        		) {
+        stage('Docker Push') {
 
-            		sh """
-            		docker push ${IMAGE_NAME}:${IMAGE_TAG}
-            		"""
+            steps {
 
-        		}
 
-    		}
+                withDockerRegistry(
+                    credentialsId: 'dockerhub-creds',
+                    url: 'https://index.docker.io/v1/'
+                ) {
 
-	} 
+
+                    sh '''
+
+                    docker push ${IMAGE_NAME}:${IMAGE_TAG}
+
+                    '''
+
+                }
+
+            }
+
+        }
+
 
 
     }
 
 
+
     post {
+
+
+        success {
+
+            echo "CI/CD Pipeline completed successfully"
+
+        }
+
+
+        failure {
+
+            echo "Pipeline failed. Check logs."
+
+        }
 
 
         always {
 
-            echo "Pipeline completed"
+            echo "Pipeline execution finished"
 
         }
 
